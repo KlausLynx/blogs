@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>Create Blog | Macro Map</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a class="brand" href="./home.html">Macro <span>Map</span></a>
+            <nav>
+                <ul class="nav">
+                    <li><a class="nav-link" href="./home.html">Home</a></li>
+                    <li><a class="nav-link" href="./dashboard.html">&larr; Dashboard</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container narrow">
+        <h1 class="page-heading">Write a new post</h1>
+        <p class="page-sub">Add a title, then build your post from text, image and video blocks.</p>
+
+        <form id="blogForm" class="card">
+            <input type="text" id="title" placeholder="Blog title" autocomplete="off" />
+
+            <div class="editor-meta">
+                <select id="category">
+                    <option value="Technology">Technology</option>
+                    <option value="Travel">Travel</option>
+                    <option value="Lifestyle">Lifestyle</option>
+                    <option value="Education">Education</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div id="blocks"></div>
+
+            <div class="toolbar">
+                <div class="add-group">
+                    <button type="button" class="btn" id="addText">+ Text</button>
+                    <button type="button" class="btn" id="addImage">+ Image</button>
+                    <button type="button" class="btn" id="addVideo">+ Video</button>
+                </div>
+                <button type="submit" class="btn btn-primary" id="publishBtn">Publish</button>
+            </div>
+        </form>
+    </main>
+</body>
+</html>
