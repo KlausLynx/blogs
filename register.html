@@ -18,12 +18,13 @@
     </header>
 
     <section class="card auth-card">
-        <form id="register" class="stack">
+        <form id="register" class="stack" novalidate>
             <div class="field">
                 <label for="username">Username</label>
                 <div class="input-wrap">
                     <input type="text" id="username" name="username" required>
                 </div>
+                <span id="nameError"></span>
             </div>
 
             <div class="field">
@@ -31,6 +32,7 @@
                 <div class="input-wrap">
                     <input type="email" id="email" name="email" required>
                 </div>
+                <span id="emailError"></span>
             </div>
 
             <div class="field">
@@ -39,6 +41,7 @@
                     <input type="password" id="password" name="password" required>
                     <i class="fa-solid fa-eye-slash" id="togglePassword"></i>
                 </div>
+                <span id="passwordError"></span>
             </div>
 
             <div class="field">
@@ -47,13 +50,15 @@
                     <input type="password" id="confirm_password" name="confirm_password" required>
                     <i class="fa-solid fa-eye-slash" id="toggleConfirmPassword"></i>
                 </div>
+                <span id="confirmPasswordError"></span>
             </div>
-
+            <span id="serverError"></span>
             <button type="submit" class="btn btn-primary btn-block">Register</button>
             <div class="auth-switch">
                 Already have an account? <a href="./login.html">Login</a>
             </div>
         </form>
     </section>
+    <script src="./register.js" type="module" ></script>
 </body>
 </html>
