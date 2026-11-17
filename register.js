@@ -1,6 +1,20 @@
 import { API_URL } from "./config.js"
 const $ = (id) => document.getElementById(id);
 
+const setupToggle = (iconId, inputId) => {
+    const icon = $(iconId);
+    const input = $(inputId);
+
+    icon.addEventListener('click', () => {
+        input.type = input.type === 'password' ? 'text' : 'password';
+        icon.classList.toggle('fa-eye');
+        icon.classList.toggle('fa-eye-slash');
+    });
+};
+
+setupToggle('togglePassword', 'password');
+setupToggle('toggleConfirmPassword', 'confirm_password');
+
 const validate = () => {
     const nameInputValue = $('username').value
     const emailInputValue = $('email').value

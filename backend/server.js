@@ -4,7 +4,10 @@ const cors = require('cors');
 const bcrypt = require('bcrypt')
 const mongoose = require('mongoose');
 const user = require('./models/user');
-const jwt = require( 'jsonwebtoken' )
+const blog = require('./models/blog')
+const jwt = require( 'jsonwebtoken' );
+const multer = require('multer');
+const cloudinary = require('cloudinary').v2
 
 const app = express()
 app.use(cors)
@@ -14,6 +17,13 @@ app.use(express.json())
 mongoose.connect(process.env.MONGODB_URI )
 .then(() => console.log('MongoDB connected'))
 .catch((err) => console.error(err))
+
+// Cloudinary Connection
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+})
 
 const PORT = process.env.PORT || 3000
 
@@ -75,6 +85,52 @@ const auth = (req, res, next) => {
     }
 }
 
-app.post('/login', auth, async () => {
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 50 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype.startsWith('image/')|| file.mimetype.startsWith('video/')) {
+            cb(null, true)
+        }else {
+            cb(new Error('Only images and videos allowed'))
+        }
+    }
+})
 
+app.post('/upload', auth, upload.single('file'), async (req, res) => {
+    try {
+        if(!req.file) {
+            return res.status(400).json({ message: 'No file uploaded' })
+        }
+        const result = await new Promise((resolve, reject) => {
+            const stream = cloudinary.uploader.upload_stream(
+                { resource_type: 'auto', folder: 'blogapp' },
+                (error, result) => {
+                if (error) reject(error)
+                else resolve(result)
+                }
+            )
+            stream.end(req.file.buffer)
+        })
+
+        res.json({ url: result.secure_url })
+    } catch (err) {
+        console.log(err)
+        res.status(500).json({ message: 'Upload failed' })
+    }
+})
+
+app.post('/blog', auth, async (req, res) => {
+    try {
+        const { title, blocks } = req.body
+
+        if(!title || !blocks || blocks.length === 0){
+            return res.status(404).json({message: 'Title and at least one block are required'})
+        }
+
+        await blog.create({title, blocks, author: req.userId})
+        return res.status(201).json({message: 'Blog Created'})
+    } catch (err) {
+        return res.status(500).json({message: 'Server Error'})
+    }
 })
