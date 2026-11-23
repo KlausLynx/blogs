@@ -6,7 +6,6 @@ const $ = (id) => document.getElementById(id)
 
 const blocksDiv = $('blocks')
 const publishBtn = $('publishBtn')
-const category = $("category").value;
 
 let uploading = false
 
@@ -103,6 +102,7 @@ $('blogForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const title = $('title').value.trim();
+    const category = $("category").value;
 
     const blocks = [...blocksDiv.children].map((div) => ({
         type: div.dataset.type,
@@ -119,6 +119,7 @@ $('blogForm').addEventListener('submit', async (e) => {
         body: JSON.stringify({ title, category, blocks })
     })
 
+        console.log(category)
     const data = await response.json()
     alert(data.message)
 

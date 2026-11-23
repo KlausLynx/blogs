@@ -127,6 +127,7 @@ app.post('/upload', auth, upload.single('file'), async (req, res) => {
 app.post('/blog', auth, async (req, res) => {
     try {
         const { title, category, blocks } = req.body
+        console.log(category)
 
         if(!title || !blocks || blocks.length === 0){
             return res.status(404).json({message: 'Title and at least one block are required'})
