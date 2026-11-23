@@ -10,7 +10,7 @@ const multer = require('multer');
 const cloudinary = require('cloudinary').v2
 
 const app = express()
-app.use(cors)
+app.use(cors())
 app.use(express.json())
 
 // Mongo Connection
@@ -27,7 +27,9 @@ cloudinary.config({
 
 const PORT = process.env.PORT || 3000
 
-app.listen((PORT, () => console.log(`Server is running on port ${PORT}`)))
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
 
 app.post('/register', async (req, res) => {
     try {
@@ -47,7 +49,7 @@ app.post('/register', async (req, res) => {
     }
 })
 
-app.post('/login', async () => {
+app.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body
         const existing = await user.findOne({email});
@@ -55,16 +57,17 @@ app.post('/login', async () => {
             return res.status(404).json({message: 'User not found'})
         }
 
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await bcrypt.compare(password, existing.password);
 
-        if (isMatch) {
+        if (!isMatch) {
             return res.status(400).json({message: 'Invalid credentials'})
         }
 
-        const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, {expiresIn: '1d'})
+        const token = jwt.sign({id: existing._id}, process.env.JWT_SECRET, {expiresIn: '1d'})
         return res.status(200).json({ message: 'Login successful', token })
     } catch (err) {
-        return res.status(500).json({message: 'Server failed'})
+        console.log(err);
+        return res.status(500).json({ message: 'Server failed' });
     }
 })
 
@@ -78,6 +81,7 @@ const auth = (req, res, next) => {
 
     try {
         const decodedToken = jwt.verify(token, process.env.JWT_SECRET)
+        console.log("decoded:", decodedToken);
         req.userId = decodedToken.id
         next()
     } catch(err) {
@@ -122,15 +126,64 @@ app.post('/upload', auth, upload.single('file'), async (req, res) => {
 
 app.post('/blog', auth, async (req, res) => {
     try {
-        const { title, blocks } = req.body
+        const { title, category, blocks } = req.body
 
         if(!title || !blocks || blocks.length === 0){
             return res.status(404).json({message: 'Title and at least one block are required'})
         }
 
-        await blog.create({title, blocks, author: req.userId})
+        await blog.create({title, category, blocks, author: req.userId})
         return res.status(201).json({message: 'Blog Created'})
     } catch (err) {
+        console.log(err);
         return res.status(500).json({message: 'Server Error'})
+    }
+});
+
+app.get('/dashboard', auth, async (req, res) => {
+    console.log("userId:", req.userId, "| header:", req.headers.authorization);
+    try {
+        const exisitingUser = await user.findById(req.userId).select('name')
+        if (!exisitingUser) {
+            return res.status(404).json({message: 'User not found'})
+        }
+
+        const blogs = await blog.find({ author: req.userId }).sort({ createdAt: -1 });
+        console.log({ name: exisitingUser.name, userBlogs: blogs });
+
+        res.status(200).json({message: 'Blogs fetched successfully', name: exisitingUser?.name, blogs});
+    } catch (err) {
+        console.log(err)
+        return res.status(500).json({message: 'Server failure'})
+    }
+})
+
+app.get('/blogs', async (req, res) => {
+    try {
+        const {search, category } = req.query
+        const filter = {}
+
+        if (category) {
+            filter.category = category
+        }
+
+        if (search) {
+            const safe = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = { $regex: safe, $options: 'i'}
+            const users = await user.find({ name: regex }).select('_id')
+            const authorIds = users.map((u) => u._id)
+
+            filter.$or = [
+                { title: regex },
+                { author: { $in: authorIds } }
+            ]
+        }
+        const blogs = await blog.find(filter)
+            .sort({ createdAt: -1 })
+            .populate('author', 'name')
+
+        return res.json(blogs)
+    } catch (err) {
+        return res.status(500).json({message: 'Server failure'})
     }
 })

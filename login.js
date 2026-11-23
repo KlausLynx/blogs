@@ -49,7 +49,7 @@ $('login').addEventListener('submit', async (e) => {
     try {
         const response = await fetch(`${ API_URL}/login`, {
             method: 'POST',
-            headers: {'content-Type': 'application/json'},
+            headers: {'content-Type': 'Application/json'},
             body: JSON.stringify({email: emailInputValue , password: passwordInputValue })
         })
 

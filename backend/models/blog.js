@@ -7,7 +7,9 @@ const blockSchema = new mongoose.Schema({
 
 const blogSchema = new mongoose.Schema({
     title:{ type: String, required: true},
-    category:{ type: String, enum:['Technology', 'Travel', 'Lifestyle', 'Education', 'Other'], default: true },
-    block: [blockSchema],
+    category:{ type: String, enum:['Technology', 'Travel', 'Lifestyle', 'Education', 'Other'], default: 'Other' },
+    blocks: [blockSchema],
     author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
 }, {timestamps: true})
+
+module.exports = mongoose.model('Blog', blogSchema)

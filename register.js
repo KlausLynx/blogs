@@ -78,7 +78,8 @@ $('register').addEventListener('submit', async (e) => {
             throw new Error(`Fetch Failed ${data.message}`)
         }
         e.target.reset()
+        window.location.href = './login.html'
     } catch(err) {
-        serverError.textContent =  `Fetch failed, ${err.message}`
+        serverError.textContent =  `${err.message}`
     }
 })

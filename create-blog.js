@@ -1,4 +1,4 @@
-import { API_URL } from "./config";
+import { API_URL } from "./config.js";
 const token = localStorage.getItem('token')
 if (!token) window.location.href = './login.html'
 
@@ -6,6 +6,7 @@ const $ = (id) => document.getElementById(id)
 
 const blocksDiv = $('blocks')
 const publishBtn = $('publishBtn')
+const category = $("category").value;
 
 let uploading = false
 
@@ -13,7 +14,25 @@ function addBlock(type) {
     console.log(type)
 
     const inputDiv = document.createElement('div');
+    inputDiv.className = 'block'
     inputDiv.dataset.type = type
+
+    const header = document.createElement('div')
+    header.className = 'block-header'
+
+    const label = document.createElement('span')
+    label.className = 'block-label'
+    label.textContent = type
+
+    const removeBtn = document.createElement('button')
+    removeBtn.type = 'button'
+    removeBtn.className = 'remove-btn'
+    removeBtn.setAttribute('aria-label', `Remove ${type} block`)
+    removeBtn.textContent = '✕'
+    removeBtn.addEventListener('click', () => inputDiv.remove())
+
+    header.append(label, removeBtn)
+    inputDiv.appendChild(header)
 
     if (type === 'text') {
         const textArea = document.createElement('textarea');
@@ -32,6 +51,7 @@ function addBlock(type) {
         fileInput.multiple = false
 
         const status = document.createElement('span')
+        status.className = 'status'
 
         fileInput.addEventListener('change', async () => {
             const file = fileInput.files[0]
@@ -55,8 +75,10 @@ function addBlock(type) {
                 if(!response.ok) throw new Error(data.message)
                     linkInput.value = data.url
                 status.textContent = 'Uploaded ✓'
+                status.className = 'status ok'
             } catch (err) {
-                status.textContent = `Failed: ${err.messagae}`
+                status.textContent = `Failed: ${err.message}`
+                status.className = 'status err'
             } finally {
                 uploading = false
                 if(!uploading) {
@@ -64,13 +86,12 @@ function addBlock(type) {
                 }
             }
         })
-        inputDiv.append(linkInput, fileInput, status)
+        const fileRow = document.createElement('div')
+        fileRow.className = 'file-row'
+        fileRow.append(fileInput, status)
+
+        inputDiv.append(linkInput, fileRow)
     }
-    const removeBtn = document.createElement('button')
-    removeBtn.type = 'button'
-    removeBtn.textContent = '✕'
-    removeBtn.addEventListener('click', () => inputDiv.remove())
-    inputDiv.appendChild(removeBtn)
     blocksDiv.appendChild(inputDiv)
 }
 
@@ -89,13 +110,13 @@ $('blogForm').addEventListener('submit', async (e) => {
     }))
     .filter((block) => block.value)
 
-    const response = await fetch(`${API_URL}/blogs`, {
+    const response = await fetch(`${API_URL}/blog`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ title, blocks })
+        body: JSON.stringify({ title, category, blocks })
     })
 
     const data = await response.json()
