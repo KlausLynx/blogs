@@ -128,15 +128,18 @@ app.post('/blog', auth, async (req, res) => {
     try {
         const { title, category, blocks } = req.body
 
-        if(!title || !blocks || blocks.length === 0){
-            return res.status(404).json({message: 'Title and at least one block are required'})
+        if (!title || !blocks || blocks.length === 0) {
+            return res.status(400).json({ message: 'Title and at least one block are required' });
         }
 
         await blog.create({title, category, blocks, author: req.userId})
         return res.status(201).json({message: 'Blog Created'})
     } catch (err) {
+        if (err.name === 'ValidationError') {
+            return res.status(400).json({ message: err.message });
+        }
         console.log(err);
-        return res.status(500).json({message: 'Server Error'})
+        return res.status(500).json({ message: 'Server Error' });
     }
 });
 

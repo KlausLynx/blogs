@@ -150,9 +150,4 @@ document.addEventListener('DOMContentLoaded', () => {
     })
 
     loadBlogs()
-
-    $('navLogout').addEventListener('click', () => {
-        localStorage.removeItem('token')
-        window.location.href = './login.html'
-    })
 })

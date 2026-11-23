@@ -102,7 +102,7 @@ $('blogForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const title = $('title').value.trim();
-    const category = $("category").value;
+    const category = $('categoryFilter').value;
 
     const blocks = [...blocksDiv.children].map((div) => ({
         type: div.dataset.type,
