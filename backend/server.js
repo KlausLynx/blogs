@@ -127,7 +127,6 @@ app.post('/upload', auth, upload.single('file'), async (req, res) => {
 app.post('/blog', auth, async (req, res) => {
     try {
         const { title, category, blocks } = req.body
-        console.log(category)
 
         if(!title || !blocks || blocks.length === 0){
             return res.status(404).json({message: 'Title and at least one block are required'})
@@ -142,17 +141,32 @@ app.post('/blog', auth, async (req, res) => {
 });
 
 app.get('/dashboard', auth, async (req, res) => {
-    console.log("userId:", req.userId, "| header:", req.headers.authorization);
     try {
-        const exisitingUser = await user.findById(req.userId).select('name')
-        if (!exisitingUser) {
+        const existingUser = await user.findById(req.userId).select('name')
+        if (!existingUser) {
             return res.status(404).json({message: 'User not found'})
         }
 
-        const blogs = await blog.find({ author: req.userId }).sort({ createdAt: -1 });
-        console.log({ name: exisitingUser.name, userBlogs: blogs });
+        const { search, category} = req.query
+        const filter = { author: existingUser._id }
 
-        res.status(200).json({message: 'Blogs fetched successfully', name: exisitingUser?.name, blogs});
+        if (category) {
+            filter.category = category
+        }
+
+        if (search) {
+            const safe = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+            const regex = new RegExp(safe, 'i')
+
+            if (!regex.test(existingUser.name)) {
+                filter.title = regex
+            }
+        }
+
+        const blogs = await blog.find(filter).sort({ createdAt: -1 })
+
+        console.log(blogs)
+        return res.status(200).json({ message: 'Dashboard loaded', name: existingUser.name, blogs})
     } catch (err) {
         console.log(err)
         return res.status(500).json({message: 'Server failure'})
@@ -186,5 +200,83 @@ app.get('/blogs', async (req, res) => {
         return res.json(blogs)
     } catch (err) {
         return res.status(500).json({message: 'Server failure'})
+    }
+})
+
+app.delete('/blogs/:id', auth, async (req, res) => {
+    try {
+        if (!mongoose.isValidObjectId(req.params.id)) {
+            return res.status(400).json({ error: 'Invalid blog id' })
+        }
+
+        const found = await blog.findById(req.params.id)
+
+        if (!found) {
+            return res.status(404).json({ error: 'Blog not found' })
+        }
+
+        if (!found.author || found.author.toString() !== String(req.userId)) {
+            console.log('Delete blocked. blog author:', found.author, 'logged-in user:', req.userId)
+            return res.status(403).json({ error: 'You can only delete your own blogs' })
+        }
+
+        await blog.findByIdAndDelete(req.params.id)
+        return res.json({ message: 'Blog deleted' })
+    } catch (err) {
+        console.log(err)
+        return res.status(500).json({ error: err.message })
+    }
+})
+
+app.get('/blogs/:id', async (req, res) => {
+    try {
+        if (!mongoose.isValidObjectId(req.params.id)) {
+            return res.status(400).json({ message: 'Invalid blog id' })
+        }
+
+        const found = await blog.findById(req.params.id).populate('author', 'name')
+
+        if (!found) {
+            return res.status(404).json({ message: 'Blog not found' })
+        }
+
+        return res.status(200).json(found)
+    } catch (err) {
+        console.log(err)
+        return res.status(500).json({ message: 'Server failure' })
+    }
+})
+
+app.put('/blogs/:id', auth, async (req, res) => {
+    try {
+        if (!mongoose.isValidObjectId(req.params.id)) {
+            return res.status(400).json({ message: 'Invalid blog id' })
+        }
+
+        const { title, category, blocks } = req.body
+
+        if (!title || !blocks || blocks.length === 0) {
+            return res.status(400).json({ message: 'Title and at least one block are required' })
+        }
+
+        const existing = await blog.findById(req.params.id)
+
+        if (!existing) {
+            return res.status(404).json({ message: 'Blog not found' })
+        }
+
+        if (existing.author.toString() !== req.userId) {
+            return res.status(403).json({ message: 'You can only edit your own blogs' })
+        }
+
+        existing.title = title
+        existing.category = category
+        existing.blocks = blocks
+        await existing.save()
+
+        return res.status(200).json({ message: 'Blog updated' })
+    } catch (err) {
+        console.log(err)
+        return res.status(500).json({ message: 'Server failure' })
     }
 })

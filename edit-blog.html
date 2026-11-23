@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <title>Edit Blog | Macro Map</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a class="brand" href="./index.html">Macro <span>Map</span></a>
+            <nav>
+                <ul class="nav">
+                    <li><a class="nav-link" href="./index.html">Home</a></li>
+                    <li><a class="nav-link" href="./dashboard.html">&larr; Dashboard</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container narrow">
+        <h1 class="page-heading">Edit post</h1>
+        <p class="page-sub">Update the title, category or any of the blocks, then save.</p>
+
+        <form id="blogForm" class="card">
+            <input type="text" id="title" placeholder="Blog title" autocomplete="off" />
+
+            <div class="editor-meta">
+                <select id="category">
+                    <option value="Technology">Technology</option>
+                    <option value="Travel">Travel</option>
+                    <option value="Lifestyle">Lifestyle</option>
+                    <option value="Education">Education</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div id="blocks"></div>
+
+            <div class="toolbar">
+                <div class="add-group">
+                    <button type="button" class="btn" id="addText">+ Text</button>
+                    <button type="button" class="btn" id="addImage">+ Image</button>
+                    <button type="button" class="btn" id="addVideo">+ Video</button>
+                </div>
+                <a class="btn" href="./dashboard.html">Cancel</a>
+                <button type="submit" class="btn btn-primary" id="saveBtn">Save changes</button>
+            </div>
+        </form>
+    </main>
+
+    <script type="module">
+        import { API_URL } from './config.js'
+
+        const token = localStorage.getItem('token')
+        const blogId = new URLSearchParams(window.location.search).get('id')
+
+        if (!token) window.location.href = './login.html'
+        if (!blogId) window.location.href = './dashboard.html'
+
+        const blocksDiv = document.getElementById('blocks')
+        const saveBtn = document.getElementById('saveBtn')
+        let uploading = 0
+
+        function addBlock(type, value = '') {
+            const wrapper = document.createElement('div')
+            wrapper.className = 'block'
+            wrapper.dataset.type = type
+
+            const header = document.createElement('div')
+            header.className = 'block-header'
+
+            const label = document.createElement('span')
+            label.className = 'block-label'
+            label.textContent = type
+
+            const removeBtn = document.createElement('button')
+            removeBtn.type = 'button'
+            removeBtn.className = 'remove-btn'
+            removeBtn.textContent = '✕'
+            removeBtn.setAttribute('aria-label', `Remove ${type} block`)
+            removeBtn.addEventListener('click', () => wrapper.remove())
+
+            header.append(label, removeBtn)
+            wrapper.appendChild(header)
+
+            if (type === 'text') {
+                const textarea = document.createElement('textarea')
+                textarea.className = 'value'
+                textarea.placeholder = 'Write something...'
+                textarea.value = value
+                wrapper.appendChild(textarea)
+            } else {
+                const linkInput = document.createElement('input')
+                linkInput.type = 'text'
+                linkInput.className = 'value'
+                linkInput.placeholder = `Paste ${type} link`
+                linkInput.value = value
+
+                const fileRow = document.createElement('div')
+                fileRow.className = 'file-row'
+
+                const fileInput = document.createElement('input')
+                fileInput.type = 'file'
+                fileInput.accept = type === 'image' ? 'image/*' : 'video/*'
+
+                const status = document.createElement('span')
+                status.className = 'status'
+
+                fileInput.addEventListener('change', async () => {
+                    const file = fileInput.files[0]
+                    if (!file) return
+
+                    const formData = new FormData()
+                    formData.append('file', file)
+
+                    uploading++
+                    saveBtn.disabled = true
+                    status.className = 'status'
+                    status.textContent = 'Uploading...'
+
+                    try {
+                        const response = await fetch(`${API_URL}/upload`, {
+                            method: 'POST',
+                            headers: { 'Authorization': `Bearer ${token}` },
+                            body: formData
+                        })
+                        const data = await response.json()
+
+                        if (!response.ok) throw new Error(data.message)
+
+                        linkInput.value = data.url
+                        status.className = 'status ok'
+                        status.textContent = 'Uploaded ✓'
+                    } catch (err) {
+                        status.className = 'status err'
+                        status.textContent = `Failed: ${err.message}`
+                    } finally {
+                        uploading--
+                        if (uploading === 0) saveBtn.disabled = false
+                    }
+                })
+
+                fileRow.append(fileInput, status)
+                wrapper.append(linkInput, fileRow)
+            }
+
+            blocksDiv.appendChild(wrapper)
+        }
+
+        // 1. LOAD the blog into the boxes (GET)
+        async function loadBlog() {
+            try {
+                const response = await fetch(`${API_URL}/blogs/${blogId}`)
+                const blog = await response.json()
+
+                if (!response.ok) throw new Error(blog.message)
+
+                document.getElementById('title').value = blog.title
+                document.getElementById('category').value = blog.category
+                blog.blocks.forEach((block) => addBlock(block.type, block.value))
+            } catch (err) {
+                alert(err.message)
+                window.location.href = './dashboard.html'
+            }
+        }
+
+        loadBlog()
+
+        // 2. ADD more blocks
+        document.getElementById('addText').addEventListener('click', () => addBlock('text'))
+        document.getElementById('addImage').addEventListener('click', () => addBlock('image'))
+        document.getElementById('addVideo').addEventListener('click', () => addBlock('video'))
+
+        // 3. SAVE the changes (PUT)
+        document.getElementById('blogForm').addEventListener('submit', async (e) => {
+            e.preventDefault()
+
+            const title = document.getElementById('title').value.trim()
+            const category = document.getElementById('category').value
+
+            const blocks = [...blocksDiv.children]
+                .map((div) => ({
+                    type: div.dataset.type,
+                    value: div.querySelector('.value').value.trim()
+                }))
+                .filter((block) => block.value)
+
+            const response = await fetch(`${API_URL}/blogs/${blogId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ title, category, blocks })
+            })
+
+            const data = await response.json()
+            alert(data.message)
+
+            if (response.ok) window.location.href = './dashboard.html'
+        })
+    </script>
+</body>
+</html>

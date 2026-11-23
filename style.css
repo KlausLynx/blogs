@@ -355,15 +355,10 @@ body.auth {
 .auth-switch a { font-weight: 600; text-decoration: none; }
 .auth-switch a:hover { text-decoration: underline; }
 
-/* ---------- Blog cards (home + dashboard) ---------- */
+/* ---------- Blog cards (home + dashboard share the same layout) ---------- */
+/* Grid: max 4 columns, fixed card height */
+.blog-list,
 .blog-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-}
-
-/* Home: grid, max 4 columns, fixed card height */
-.blog-list {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 20px;
@@ -375,9 +370,18 @@ body.auth {
     cursor: pointer;
 }
 
-.blog-list .blog-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+/* Dashboard cards are a bit taller to make room for the edit/delete row */
+.blog-grid .blog-card {
+    height: 490px;
+    overflow: hidden;
+    cursor: pointer;
+}
 
-.blog-list .blog-card h2 {
+.blog-list .blog-card:hover,
+.blog-grid .blog-card:hover { transform: translateY(-3px); border-color: var(--accent); }
+
+.blog-list .blog-card h2,
+.blog-grid .blog-card h2 {
     font-size: 1.15rem;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -386,9 +390,8 @@ body.auth {
     overflow: hidden;
 }
 
-.blog-list .blog-body { overflow: hidden; }
-
-.blog-list .blog-body img { max-width: 110px; flex-shrink: 0; }
+.blog-list .blog-body,
+.blog-grid .blog-body { overflow: hidden; }
 
 .blog-card {
     display: flex;
@@ -401,8 +404,6 @@ body.auth {
     padding: 20px;
     transition: transform .2s, border-color .2s;
 }
-
-.blog-grid .blog-card:hover { transform: translateY(-3px); border-color: var(--accent); }
 
 .blog-card h2,
 .blog-card h3 {
@@ -435,7 +436,7 @@ body.auth {
     border: 1px solid var(--border);
 }
 
-/* Dashboard cards show a short preview */
+/* Card previews are cut off after a few lines */
 .blog-grid .blog-body p,
 .blog-list .blog-body p {
     display: -webkit-box;
@@ -618,9 +619,18 @@ input[type="file"]::file-selector-button:hover { filter: brightness(.95); }
 .add-group { display: flex; flex-wrap: wrap; gap: 8px; flex: 1 1 auto; }
 
 /* ---------- Responsive ---------- */
-@media (max-width: 1000px) { .blog-list { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (max-width: 760px)  { .blog-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 520px)  { .blog-list { grid-template-columns: 1fr; } }
+@media (max-width: 1000px) {
+    .blog-list,
+    .blog-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+    .blog-list,
+    .blog-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+    .blog-list,
+    .blog-grid { grid-template-columns: 1fr; }
+}
 
 @media (max-width: 600px) {
     .topbar-inner { justify-content: center; }
@@ -628,7 +638,6 @@ input[type="file"]::file-selector-button:hover { filter: brightness(.95); }
     .page-header { flex-direction: column; align-items: stretch; text-align: center; }
     .page-header .btn { width: 100%; }
 
-    .blog-grid { grid-template-columns: 1fr; }
     .filter-bar,
     .topbar-hero .filter-bar { grid-template-columns: 1fr; }
     .topbar-hero { grid-template-columns: 1fr; text-align: center; }
@@ -683,86 +692,34 @@ input[type="file"]::file-selector-button:hover { filter: brightness(.95); }
 .post .blog-body p {
     font-size: 1.1rem;
     line-height: 1.85;
-    white-space: pre-line; 
+    white-space: pre-line;
 }
 
 .post .blog-body img { max-width: 180px; margin: 6px 0; }
-/* ---------- Dashboard blog cards (built in dashboard.js) ---------- */
-/* Blocks are shown in the same order they were written: text, image, video... */
+
+/* ---------- Blog cards, built in home.js and dashboard.js ---------- */
+/* Card = optional cover image on top + padded content underneath */
+.blog-list .blog-card,
 .blog-grid .blog-card {
     padding: 0;
     gap: 0;
-    overflow: hidden;
     transition: transform .2s, border-color .2s, box-shadow .2s;
 }
 
+.blog-list .blog-card:hover,
 .blog-grid .blog-card:hover {
     box-shadow: 0 2px 4px rgba(20, 20, 20, .06), 0 16px 32px rgba(20, 20, 20, .12);
 }
 
-.blog-grid .blog-body { gap: 0; }
-
-/* Text block */
-.blog-grid .blog-card .blog-text {
-    margin: 0;
-    padding: 18px 20px;
-    font-size: .98rem;
-    line-height: 1.65;
-    color: var(--text);
-    overflow-wrap: anywhere;
-    -webkit-line-clamp: 4;
-    line-clamp: 4;
-}
-
-.blog-grid .blog-card .blog-text + .blog-text { padding-top: 0; }
-
-/* Image + video blocks: full card width, no forced order */
-.blog-grid .blog-card .blog-media {
-    display: block;
-    width: 100%;
-    max-width: 100%;
-    height: auto;
-    aspect-ratio: 16 / 9;            /* height follows the card width */
-    max-height: min(60vh, 420px);    /* never taller than the screen allows */
-    object-fit: cover;
-    margin: 0;
-    border: 0;
-    border-block: 1px solid var(--border);
-    border-radius: 0;
-    background: var(--surface-2);
-}
-
-.blog-grid .blog-card .blog-video { object-fit: contain; background: #000; }
-
-/* No double borders when two media blocks sit together, or at the card edges */
-.blog-grid .blog-card .blog-media + .blog-media { border-top: 0; }
-.blog-grid .blog-card .blog-body > .blog-media:first-child { border-top: 0; }
-.blog-grid .blog-card .blog-body > .blog-media:last-child { border-bottom: 0; }
-
-/* Slightly taller media on phones so it isn't a thin strip */
-@media (max-width: 600px) {
-    .blog-grid .blog-card .blog-media { aspect-ratio: 4 / 3; }
-}
-
-/* ---------- Home blog cards (built in home.js) ---------- */
-/* Card = optional cover image on top + padded content underneath */
-.blog-list .blog-card {
-    padding: 0;
-    gap: 0;
-    transition: transform .2s, border-color .2s, box-shadow .2s;
-}
-
-.blog-list .blog-card:hover {
-    box-shadow: 0 2px 4px rgba(20, 20, 20, .06), 0 16px 32px rgba(20, 20, 20, .12);
-}
-
-.blog-list .blog-card:focus-visible {
+.blog-list .blog-card:focus-visible,
+.blog-grid .blog-card:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
 }
 
 /* Only rendered when the blog has an image */
-.blog-list .blog-card .blog-cover {
+.blog-list .blog-card .blog-cover,
+.blog-grid .blog-card .blog-cover {
     display: block;
     width: 100%;
     height: 160px;
@@ -772,27 +729,38 @@ input[type="file"]::file-selector-button:hover { filter: brightness(.95); }
     border-bottom: 1px solid var(--border);
 }
 
-.blog-list .blog-card .blog-content {
+.blog-list .blog-card .blog-content,
+.blog-grid .blog-card .blog-content {
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: 10px;
     min-height: 0;
     padding: 20px;
+    overflow: hidden;   /* content never grows past the fixed card height */
 }
 
-/* Content never grows past the fixed card height; the preview is cut off with "…" */
-.blog-list .blog-card .blog-content { overflow: hidden; }
-.blog-list .blog-card .blog-content .blog-body { flex: 1; min-height: 0; overflow: hidden; }
+/* The preview is cut off with "…" */
+.blog-list .blog-card .blog-content .blog-body,
+.blog-grid .blog-card .blog-content .blog-body { flex: 1; min-height: 0; overflow: hidden; }
+
 .blog-list .blog-card .blog-content h2,
 .blog-list .blog-card .blog-content .blog-meta,
-.blog-list .blog-card .blog-read-more { flex-shrink: 0; }
+.blog-list .blog-card .blog-read-more,
+.blog-grid .blog-card .blog-content h2,
+.blog-grid .blog-card .blog-content .blog-meta,
+.blog-grid .blog-card .blog-read-more,
+.blog-grid .blog-card .blog-actions { flex-shrink: 0; }
 
 /* Shorter preview when there's an image, longer one when there isn't */
-.blog-list .blog-card.has-cover .blog-body p { -webkit-line-clamp: 3; line-clamp: 3; }
-.blog-list .blog-card.no-cover .blog-body p  { -webkit-line-clamp: 8; line-clamp: 8; }
+.blog-list .blog-card.has-cover .blog-body p,
+.blog-grid .blog-card.has-cover .blog-body p { -webkit-line-clamp: 3; line-clamp: 3; }
 
-.blog-list .blog-meta {
+.blog-list .blog-card.no-cover .blog-body p,
+.blog-grid .blog-card.no-cover .blog-body p { -webkit-line-clamp: 8; line-clamp: 8; }
+
+.blog-list .blog-meta,
+.blog-grid .blog-meta {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -824,4 +792,62 @@ input[type="file"]::file-selector-button:hover { filter: brightness(.95); }
     color: var(--accent);
     background: var(--accent-soft);
     border-radius: 999px;
+}
+
+/* ---------- Dashboard card actions (edit / delete icon buttons) ---------- */
+/* On the dashboard the edit/delete row sits under "Read more".
+   Only one divider line is kept: the one above the buttons. */
+.blog-grid .blog-card .blog-read-more {
+    margin-top: auto;
+    padding-top: 0;
+    border-top: 0;
+}
+
+.blog-grid .blog-card .blog-actions {
+    margin-top: 0;
+    padding: 14px 0 0;
+}
+
+.btn-edit,
+.btn-delete {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0 14px;
+    font-size: 1rem;
+    line-height: 1;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s, transform .05s;
+}
+
+.btn-edit i,
+.btn-delete i { pointer-events: none; }
+
+.btn-edit:active,
+.btn-delete:active { transform: translateY(1px); }
+
+.btn-edit:focus-visible,
+.btn-delete:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.btn-edit:disabled,
+.btn-delete:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+
+/* Edit: soft accent */
+.btn-edit { background: var(--accent-soft); color: var(--accent); }
+.btn-edit:hover:not(:disabled) { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* Delete: soft danger */
+.btn-delete { background: var(--danger-soft); color: var(--danger); }
+.btn-delete:hover:not(:disabled) { background: var(--danger); border-color: var(--danger); color: #fff; }
+
+@media (prefers-color-scheme: dark) {
+    .btn-edit:hover:not(:disabled) { color: #0c1311; }
+    .btn-delete:hover:not(:disabled) { color: #0c1311; }
 }
