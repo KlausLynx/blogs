@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="light dark">
+    <meta name="description" content="Write, edit, and publish new posts on The Macro Map, a blog on economics, geoeconomics, and geopolitics.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
@@ -34,11 +35,36 @@
             <input type="text" id="title" placeholder="Blog title" autocomplete="off" />
 
             <div class="editor-meta">
-                <select id="category">
-                    <option value="Technology">Technology</option>
-                    <option value="Travel">Travel</option>
-                    <option value="Lifestyle">Lifestyle</option>
-                    <option value="Education">Education</option>
+                <select id="categoryFilter">
+                    <option value="">All categories</option>
+
+                    <optgroup label="Economics">
+                        <option value="Macroeconomics">Macroeconomics</option>
+                        <option value="Monetary Policy">Monetary Policy</option>
+                        <option value="Fiscal Policy">Fiscal Policy</option>
+                        <option value="Inflation & Prices">Inflation &amp; Prices</option>
+                        <option value="Markets & Investing">Markets &amp; Investing</option>
+                        <option value="Development Economics">Development Economics</option>
+                        <option value="Africa & Nigeria">Africa &amp; Nigeria</option>
+                    </optgroup>
+
+                    <optgroup label="Geoeconomics">
+                        <option value="Trade & Tariffs">Trade &amp; Tariffs</option>
+                        <option value="Energy & Commodities">Energy &amp; Commodities</option>
+                        <option value="Sanctions & Export Controls">Sanctions &amp; Export Controls</option>
+                        <option value="Supply Chains">Supply Chains</option>
+                        <option value="Currencies & Reserves">Currencies &amp; Reserves</option>
+                        <option value="Debt & Global Finance">Debt &amp; Global Finance</option>
+                    </optgroup>
+
+                    <optgroup label="Geopolitics">
+                        <option value="Conflict & Security">Conflict &amp; Security</option>
+                        <option value="Great Power Rivalry">Great Power Rivalry</option>
+                        <option value="Middle East">Middle East</option>
+                        <option value="Elections & Politics">Elections &amp; Politics</option>
+                        <option value="Regional Blocs & Alliances">Regional Blocs &amp; Alliances</option>
+                    </optgroup>
+
                     <option value="Other">Other</option>
                 </select>
             </div>
