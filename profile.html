@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile | Macro Map</title>
+    <!-- Use the same Font Awesome link as your other pages -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a href="./index.html" class="brand">Macro <span>Map</span></a>
+            <ul class="nav">
+                <li><a href="./home.html" class="nav-link"><i class="fa-solid fa-house"></i> Home</a></li>
+                <li><a href="./dashboard.html" class="nav-link"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
+                <li><a href="./profile.html" class="nav-link active"><i class="fa-solid fa-user"></i> Profile</a></li>
+                <li><button type="button" id="logoutBtn" class="nav-link danger"><i class="fa-solid fa-right-from-bracket"></i> Logout</button></li>
+            </ul>
+        </div>
+    </header>
+
+    <main class="container narrow">
+        <h1 class="page-heading">My Profile</h1>
+        <p class="page-sub">Your account details and writing stats.</p>
+
+        <article class="card profile-card" id="profileCard" hidden>
+            <div class="profile-head">
+                <i class="fa-solid fa-circle-user profile-avatar" aria-hidden="true"></i>
+                <div class="profile-id">
+                    <h2 id="profileName"></h2>
+                    <small id="profileEmail"></small>
+                </div>
+            </div>
+
+            <div class="profile-stats">
+                <div class="profile-stat">
+                    <span class="profile-stat-label">Member since</span>
+                    <span class="profile-stat-value" id="joinedAt"></span>
+                </div>
+                <div class="profile-stat">
+                    <span class="profile-stat-label">Blogs written</span>
+                    <span class="profile-stat-value" id="blogCount"></span>
+                </div>
+            </div>
+        </article>
+
+        <p id="message" class="message"></p>
+    </main>
+
+    <script type="module" src="./profile.js"></script>
+</body>
+</html>

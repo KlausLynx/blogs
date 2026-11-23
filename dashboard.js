@@ -200,8 +200,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let searchTimer
     $('search').addEventListener('input', () => {
         clearTimeout(searchTimer)
-        searchTimer = setTimeout(loadBlogs, 300)   // debounce: wait until typing pauses
+        searchTimer = setTimeout(loadBlogs, 300)   
     })
 
     loadBlogs()
+
+    $('navLogout').addEventListener('click', () => {
+        localStorage.removeItem('token')
+        window.location.href = './login.html'
+    })
 })

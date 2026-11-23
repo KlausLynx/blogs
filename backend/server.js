@@ -280,3 +280,22 @@ app.put('/blogs/:id', auth, async (req, res) => {
         return res.status(500).json({ message: 'Server failure' })
     }
 })
+
+app.get('/profile', auth, async (req, res) => {
+    try {
+        const existingUser = await user.findById(req.userId).select('-password')
+    if (!existingUser) {
+        return res.status(404).json({message: 'User not Found'})
+    }
+
+    const blogCount = await blog.countDocuments({author: req.userId})
+    return res.status(200).json({ name: existingUser.name, 
+        email: existingUser.email, 
+        joinedAt: existingUser.createdAt || existingUser._id.getTimestamp(), 
+        blogCount
+    })
+    } catch (err) {
+        console.log(err)
+        return res.status(500).json({ message: 'Server failure' })
+    }
+})
