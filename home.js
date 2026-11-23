@@ -1,6 +1,6 @@
 import { API_URL } from "./config.js"
 
-const DETAILS_PAGE = './blog.html'
+const DETAILS_PAGE = './blog-page.html'
 
 // Max characters shown on a card; the rest is cut off with "…"
 const PREVIEW_CHARS_WITH_COVER = 110

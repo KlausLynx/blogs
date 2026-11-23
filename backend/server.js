@@ -299,3 +299,7 @@ app.get('/profile', auth, async (req, res) => {
         return res.status(500).json({ message: 'Server failure' })
     }
 })
+
+app.use((err, req, res, next) => {
+    res.status(400).json({ message: err.message })
+})

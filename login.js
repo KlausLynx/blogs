@@ -56,13 +56,13 @@ $('login').addEventListener('submit', async (e) => {
         const data = await response.json();
 
         if (!response.ok) {
-            throw new Error(`Fetch Failed ${data.message}`)
+            throw new Error(data.message)
         }else {
             localStorage.setItem('token', data.token)
             window.location.href = './dashboard.html'
         }
         e.target.reset()
     } catch (err) {
-        serverError.textContent = `Fetch failed, ${err.message}`
+        serverError.textContent = `${err.message}`
     }   
 })

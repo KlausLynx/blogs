@@ -604,7 +604,7 @@ input[type="file"]::file-selector-button:hover { filter: brightness(.95); }
 
 .status { font-size: .85rem; color: var(--muted); }
 .status.ok { color: var(--ok); }
-.status.err, #nameError, #emailError, #passwordError, #confirmPasswordError { color: var(--danger); }
+.status.err, #nameError, #emailError, #passwordError, #confirmPasswordError, #serverError { color: var(--danger); }
 
 .toolbar {
     display: flex;
